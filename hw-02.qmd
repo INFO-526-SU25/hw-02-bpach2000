@@ -51,6 +51,9 @@ if (!require("dsbox")) devtools::install_github("databrew/dsbox")
 
 # load dsbox package
 library(dsbox)
+
+# global ggplot theme
+theme_set(theme_minimal(base_size = 11))
 ```
 
 ## 1 - A new day, a new plot, a new geom
@@ -196,13 +199,17 @@ median_housing <- read_csv(here("data", "median-housing.csv")) |>
 recessions <- read_csv(here("data" ,"recessions.csv")) |>
   glimpse()
 
+# create the plot
 ggplot(median_housing, aes(x = date, y = price)) + 
   geom_line(linewidth = 0.8, color = "deepskyblue3") +
   scale_x_date(
     breaks = seq(as.Date("1965-01-01"), as.Date("2020-01-01"), by = "5 years"),
     date_labels = "%Y"
   ) +
-  scale_y_continuous(breaks = seq(0, 400000, 40000), labels = comma) +
+  scale_y_continuous(
+    breaks = seq(0, 400000, 40000), 
+    labels = comma,
+    limits = c(0, 400000)) +
   labs (
     x = "Year",
     y = "Dollars",
@@ -210,10 +217,100 @@ ggplot(median_housing, aes(x = date, y = price)) +
     subtitle = "Not seasonally adjusted",
     caption = "Source: Census; HUD" 
   ) +
-  theme_minimal(base_size = 11)
+  theme(
+    plot.title.position = "plot",
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
 
+# identify recessions
+recessions <- recessions |>
+  mutate(
+    timeframe = case_when(
+      (Peak >= min(median_housing$date) & Peak <= max(median_housing$date)) |
+      (Trough >= min(median_housing$date) & Trough <= max(median_housing$date)) ~ TRUE,
+      TRUE ~ FALSE
+    )
+  ) |>
+  filter(
+    Peak <= max(median_housing$date) & Trough >= min(median_housing$date)
+  ) |>
+  glimpse()
 
+# create the second plot - adding recession data
+ggplot(median_housing, aes(x = date, y = price)) + 
+  geom_rect(
+    data = recessions,
+    aes(xmin = Peak, xmax = Trough, ymin = -Inf, ymax = Inf),
+    fill = "lightgray", inherit.aes = FALSE
+  ) +
+  geom_line(linewidth = 0.8, color = "deepskyblue3") +
+  scale_x_date(
+    breaks = seq(as.Date("1965-01-01"), as.Date("2020-01-01"), by = "5 years"),
+    date_labels = "%Y"
+  ) +
+  scale_y_continuous(
+    breaks = seq(0, 400000, 40000), 
+    labels = comma,
+    limits = c(0, 400000)) +
+  labs (
+    x = "Year",
+    y = "Dollars",
+    title = "Median sales price of houses sold in the United States",
+    subtitle = "Not seasonally adjusted",
+    caption = "Source: Census; HUD" 
+  ) +
+  theme(
+    plot.title.position = "plot",
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+
+# add year and quarter columns
+median_housing_subset <- median_housing |> 
+  mutate(
+    year = format(date, "%Y"),
+    quarter = case_when(
+      date >= as.Date("2019-01-01") & date <= as.Date("2019-03-31") ~ "Q1",
+      date >= as.Date("2019-04-01") & date <= as.Date("2019-06-30") ~ "Q2",
+      date >= as.Date("2019-07-01") & date <= as.Date("2019-09-30") ~ "Q3",
+      date >= as.Date("2019-10-01") & date <= as.Date("2019-12-31") ~ "Q4",
+      date >= as.Date("2020-01-01") & date <= as.Date("2020-03-31") ~ "Q1",
+      date >= as.Date("2020-04-01") & date <= as.Date("2020-06-30") ~ "Q2",
+      date >= as.Date("2020-07-01") & date <= as.Date("2020-09-30") ~ "Q3",
+      date >= as.Date("2020-10-01") & date <= as.Date("2020-12-31") ~ "Q4",
+      TRUE ~ "" 
+    ),
+    quarter = factor(quarter, levels = c("Q1", "Q2", "Q3", "Q4"))
+    ) |>
+  filter(year %in% c("2019", "2020"))
+
+# create the third plot - with year subset and quarter
+ggplot(median_housing_subset, aes(x = quarter, y = price, group = 1)) + 
+  geom_line(linewidth = 0.8, color = "deepskyblue3") +
+  geom_point(size = 4, show.legend = FALSE) +
+  scale_y_continuous(
+    breaks = seq(300000, 360000, 20000), 
+    labels = comma,
+    limits = c(300000, 360000)) +
+  labs (
+    x = "Quarters",
+    y = "Dollars",
+    title = "Median sales price of houses sold in the United States",
+    subtitle = "Not seasonally adjusted",
+    caption = "Source: Census; HUD" 
+  ) +
+  facet_grid(. ~ year) + 
+  theme(
+    plot.title.position = "plot"
+  )
 ```
+### Sources
+Referenced scale_y_continuous parameters here:
+https://ggplot2.tidyverse.org/reference/scale_continuous.html
+
 
 ## 4 - Expect More. Plot More.
 
