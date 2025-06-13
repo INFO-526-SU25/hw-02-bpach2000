@@ -59,7 +59,7 @@ theme_set(theme_minimal(base_size = 11))
 ## 1 - A new day, a new plot, a new geom
 
 ```{r}
-#| label: Question 1
+#| label: Question 1 - edibnb neighbourhood plot
 
 # load edibnb dataset into environment
 data(edibnb)
@@ -101,7 +101,7 @@ https://readr.tidyverse.org/reference/write_delim.html
 ## 2 - Foreign Connected PACs
 
 ```{r}
-#| label: Question 2
+#| label: Question 2 - political parties plots
 
 # get a list of files with "Foreign Connected PAC" in their names
 list_of_files <- dir_ls(path = "data", regexp = "Foreign Connected PAC")
@@ -184,7 +184,7 @@ https://tidyr.tidyverse.org/reference/pivot_longer.html
 
 ## 3 - Median housing prices in the US
 ```{r}
-#| label: Question 3
+#| label: Question 3 - housing and recession plots
 
 # Read in data from median housing file
 median_housing <- read_csv(here("data", "median-housing.csv")) |>
@@ -313,6 +313,76 @@ https://ggplot2.tidyverse.org/reference/scale_continuous.html
 
 
 ## 4 - Expect More. Plot More.
+```{r}
+#| label: Question 4 - target logo plot
 
+# angle vector
+angle <- seq(0, 2 * pi, length.out = 1000)
+
+# outer circle coordinates
+outer_circle <- tibble(
+  x = 2 * cos(angle),
+  y = 2 * sin(angle),
+  group = "outer"
+)
+
+# create inner circle coordinates
+inner_circle <- tibble(
+  x = 0.4 * cos(angle),
+  y = 0.4 * sin(angle),
+  group = "innerr"
+)
+
+# center point
+center <- tibble(
+  x = 0,
+  y = 0,
+  group = "center"
+)
+
+# trademark circle
+trademark <- tibble(
+  x = 0.3 * cos(angle) + 2.5,
+  y = 0.3 * sin(angle) - 3.5,
+  group = "trademark"
+)
+
+# combine both circles
+circle <- bind_rows(outer_circle, inner_circle, center)
+
+# Plot the smooth circle
+ggplot(circle, aes(x = x, y = y, group = group)) +
+  geom_point(aes(x = 0, y = 0), color = "#cc0000") +
+  geom_path(linewidth = 10, color = "#cc0000") +
+  coord_equal(xlim = c(-4, 4), ylim = c(-4, 4)) +
+  annotate("text", x = 0, y = -3, label = "TARGET", color = "#cc0000", size = 10, font = "Helvetica", fontface = "bold") +
+  annotate("text", x = 2.5, y = -3.5, label = "R", color = "#cc0000", size = 4, font = "Helvetica", fontface = "bold") +
+  geom_path(data = trademark, linewidth = 1, color = "#cc0000") +
+  labs(
+    title = "Target logo",
+    x = "X Coordinates",
+    y = "Y Coordinates"
+    ) +
+  theme(
+    plot.title.position = "plot",
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_blank()
+  )
+
+```
+### Sources
+Referenced for combining rows in tibble:
+https://dplyr.tidyverse.org/reference/bind_rows.html
+
+Target's font name:
+https://www.subframe.com/tips/what-font-does-target-use#:~:text=The%20use%20of%20Helvetica%20Neue,visual%20consistency%20and%20modern%20appeal.
+
+Target's color:
+https://www.brandcolorcode.com/target
+
+Directly taken length.out to generate length of sequence:
+https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq
 
 ## 5 - Mirror, mirror on the wall, who’s the ugliest of them all?
