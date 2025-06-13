@@ -24,6 +24,7 @@ library(ggridges)
 library(ggplot2)
 library(dplyr)
 library(here)
+library(glue)
 library(ggthemes)
 
 # set theme for ggplot2
@@ -197,12 +198,10 @@ median_housing <- read_csv(here("data", "median-housing.csv")) |>
     date = DATE,
     price = MSPUS
   ) |>
-  select(date, price) |>
-  glimpse()
+  select(date, price)
 
 # Read in data from recessions file
-recessions <- read_csv(here("data" ,"recessions.csv")) |>
-  glimpse()
+recessions <- read_csv(here("data" ,"recessions.csv"))
 
 # create the plot
 ggplot(median_housing, aes(x = date, y = price)) + 
@@ -240,8 +239,7 @@ recessions <- recessions |>
   ) |>
   filter(
     Peak <= max(median_housing$date) & Trough >= min(median_housing$date)
-  ) |>
-  glimpse()
+  ) 
 
 # create the second plot - adding recession data
 ggplot(median_housing, aes(x = date, y = price)) + 
@@ -250,7 +248,7 @@ ggplot(median_housing, aes(x = date, y = price)) +
     aes(xmin = Peak, xmax = Trough, ymin = -Inf, ymax = Inf),
     fill = "lightgray", inherit.aes = FALSE
   ) +
-  geom_line(linewidth = 0.8, color = "deepskyblue3") +
+  geom_line(linewidth = 0.8, color = "deepskyblue4") +
   scale_x_date(
     breaks = seq(as.Date("1965-01-01"), as.Date("2020-01-01"), by = "5 years"),
     date_labels = "%Y"
@@ -276,7 +274,7 @@ ggplot(median_housing, aes(x = date, y = price)) +
 # add year and quarter columns
 median_housing_subset <- median_housing |> 
   mutate(
-    year = format(date, "%Y"),
+    year = year(date),
     quarter = case_when(
       date >= as.Date("2019-01-01") & date <= as.Date("2019-03-31") ~ "Q1",
       date >= as.Date("2019-04-01") & date <= as.Date("2019-06-30") ~ "Q2",
@@ -286,35 +284,59 @@ median_housing_subset <- median_housing |>
       date >= as.Date("2020-04-01") & date <= as.Date("2020-06-30") ~ "Q2",
       date >= as.Date("2020-07-01") & date <= as.Date("2020-09-30") ~ "Q3",
       date >= as.Date("2020-10-01") & date <= as.Date("2020-12-31") ~ "Q4",
-      TRUE ~ "" 
+      TRUE ~ ""
     ),
-    quarter = factor(quarter, levels = c("Q1", "Q2", "Q3", "Q4"))
-    ) |>
+    year_quarter = paste(year, quarter), 
+    year_quarter = factor(
+      year_quarter,
+      levels = c("2019 Q1", "2019 Q2", "2019 Q3", "2019 Q4","2020 Q1", "2020 Q2", "2020 Q3", "2020 Q4"
+      )
+    )
+  ) |>
   filter(year %in% c("2019", "2020"))
 
+
+
 # create the third plot - with year subset and quarter
-ggplot(median_housing_subset, aes(x = quarter, y = price, group = 1)) + 
-  geom_line(linewidth = 0.8, color = "deepskyblue3") +
-  geom_point(size = 4, show.legend = FALSE) +
+ggplot(median_housing_subset, aes(x = year_quarter, y = price, group = 1)) +
+  geom_point(shape = 1, fill = NA, size = 2, color = "deepskyblue4", show.legend = FALSE) +
+  geom_line(linewidth = 0.8, color = "deepskyblue4") +
   scale_y_continuous(
-    breaks = seq(300000, 360000, 20000), 
-    labels = comma,
-    limits = c(300000, 360000)) +
+    breaks = seq(300000, 360000, 20000),
+    labels = comma
+  ) +
   labs (
     x = "Quarters",
     y = "Dollars",
     title = "Median sales price of houses sold in the United States",
     subtitle = "Not seasonally adjusted",
-    caption = "Source: Census; HUD" 
+    caption = "Source: Census; HUD"
   ) +
-  facet_grid(. ~ year) + 
+  annotate(
+    geom = "text",
+    x = c("2019 Q2", "2020 Q2"),
+    y = -10000,
+    label = c("2019", "2020"),
+    size = 4
+  ) +
+  coord_cartesian(clip = "on", ylim = c(300000, 360000)) +
   theme(
-    plot.title.position = "plot"
+    plot.title.position = "plot",
+    panel.border = element_rect(color = "lightgrey", fill = NA, linewidth = 0.5)
   )
 ```
 ### Sources
 Referenced scale_y_continuous parameters here:
 https://ggplot2.tidyverse.org/reference/scale_continuous.html
+
+Referenced for concatenating strings:
+https://stat.ethz.ch/R-manual/R-devel/library/base/html/paste.html
+
+Referenced for factor inside data:
+https://stat.ethz.ch/R-manual/R-devel/library/base/html/factor.html
+
+Referenced for hollow circles:
+https://ggplot2.tidyverse.org/reference/geom_point.html
 
 
 ## 4 - Expect More. Plot More.
@@ -394,8 +416,6 @@ https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq
 ```{r}
 #| label: Question 5 - ugly plot
 
-glimpse(penguins)
-
 ggplot(penguins, aes(x = bill_len, y = body_mass, color = island)) +
   scale_color_manual(values = c("yellow", "green", "red")) +
   geom_rect(
@@ -417,8 +437,7 @@ ggplot(penguins, aes(x = bill_len, y = body_mass, color = island)) +
     panel.grid.minor = element_blank(),
     panel.grid.major = element_blank()
   ) +
-  theme_wsj() + 
   labs(title = "Penguin Data...",
-       x = "PenGUIN) data 1",
-       y = "PENGUIN Data 2") 
+       x = "PenGUIN) data 1 - bill_len",
+       y = "PENGUIN Data 2 - body_mass") 
 ```
