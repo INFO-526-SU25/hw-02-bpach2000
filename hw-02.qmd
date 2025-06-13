@@ -5,6 +5,10 @@ format:
   html:
     embed-resources: true
 toc: true
+execute:
+  warning: false
+  error: false
+  message: false
 ---
 ```{r}
 #| label: Set-up
@@ -20,6 +24,7 @@ library(ggridges)
 library(ggplot2)
 library(dplyr)
 library(here)
+library(ggthemes)
 
 # set theme for ggplot2
 ggplot2::theme_set(ggplot2::theme_minimal(base_size = 11))
@@ -382,7 +387,38 @@ https://www.subframe.com/tips/what-font-does-target-use#:~:text=The%20use%20of%2
 Target's color:
 https://www.brandcolorcode.com/target
 
-Directly taken length.out to generate length of sequence:
+Referenced to build a sequence and directly taken length.out to generate length of sequence:
 https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq
 
 ## 5 - Mirror, mirror on the wall, who’s the ugliest of them all?
+```{r}
+#| label: Question 5 - ugly plot
+
+glimpse(penguins)
+
+ggplot(penguins, aes(x = bill_len, y = body_mass, color = island)) +
+  scale_color_manual(values = c("yellow", "green", "red")) +
+  geom_rect(
+    xmin = 40, xmax = 60,
+    ymin = 2700, ymax = 6000,
+    fill = "orange", alpha = 0.3,
+    inherit.aes = FALSE
+  ) +
+  geom_rect(
+    xmin = 40, xmax = 60,
+    ymin = 2700, ymax = 6000,
+    fill = "orange", alpha = 0.3,
+    inherit.aes = FALSE
+  ) +
+  geom_point() +
+  facet_grid(. ~ year) +
+  theme(
+    plot.title.position = "plot",
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank()
+  ) +
+  theme_wsj() + 
+  labs(title = "Penguin Data...",
+       x = "PenGUIN) data 1",
+       y = "PENGUIN Data 2") 
+```
