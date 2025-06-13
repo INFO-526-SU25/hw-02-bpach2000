@@ -10,6 +10,7 @@ execute:
   error: false
   message: false
 ---
+
 ```{r}
 #| label: Set-up
 # load packages
@@ -62,7 +63,11 @@ library(dsbox)
 theme_set(theme_minimal(base_size = 11))
 ```
 
+
+
 ## 1 - A new day, a new plot, a new geom
+
+
 
 ```{r}
 #| label: Question 1 - edibnb neighbourhood plot
@@ -99,12 +104,16 @@ ggplot(edibnb, aes(x = review_scores_rating, y = neighbourhood)) +
   theme_ridges()
 
 ```
+
+
 ### Sources
 Tools on using the write function directly used from:
 https://readr.tidyverse.org/reference/write_delim.html
 
 
 ## 2 - Foreign Connected PACs
+
+
 
 ```{r}
 #| label: Question 2 - political parties plots
@@ -200,6 +209,8 @@ ggplot(germany, aes(x = year, y = total_amount, color = party, group = party)) +
     axis.title.y = element_text(hjust = 0)
   )
 ```
+
+
 The plot above shows how much money Germany-connected PACs are contributing to U.S. political parties. Based on both the Germany and UK data, it appears that Republican affiliated PACs receive significantly more funding than Democrat affiliated PACs. That said, both parties receive millions of dollars in contributions from foreign-connected PACs.
 
 ### Sources
@@ -219,6 +230,8 @@ https://tidyr.tidyverse.org/reference/pivot_longer.html
 
 
 ## 3 - Median housing prices in the US
+
+
 ```{r}
 #| label: Question 3 - housing and recession plots
 
@@ -355,6 +368,8 @@ ggplot(median_housing_subset, aes(x = year_quarter, y = price, group = 1)) +
     panel.border = element_rect(color = "lightgrey", fill = NA, linewidth = 0.5)
   )
 ```
+
+
 ### Sources
 Referenced scale_y_continuous parameters here:
 https://ggplot2.tidyverse.org/reference/scale_continuous.html
@@ -370,6 +385,8 @@ https://ggplot2.tidyverse.org/reference/geom_point.html
 
 
 ## 4 - Expect More. Plot More.
+
+
 ```{r}
 #| label: Question 4 - target logo plot
 
@@ -429,6 +446,8 @@ ggplot(circle, aes(x = x, y = y, group = group)) +
   )
 
 ```
+
+
 ### Sources
 Referenced for combining rows in tibble:
 https://dplyr.tidyverse.org/reference/bind_rows.html
@@ -443,6 +462,8 @@ Referenced to build a sequence and directly taken length.out to generate length 
 https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq
 
 ## 5 - Mirror, mirror on the wall, who’s the ugliest of them all?
+
+
 ```{r}
 #| label: Question 5 - ugly plot
 
